@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="header" class="topbar">
+  <h3>Admin panel</h3>
+
+  <nav th:if="${username != null}" class="navigation">
+    <ul>
+      <li><a th:href="@{/admin}">Dashboard</a></li>
+      <li><a th:href="@{/admin/users}">Users</a></li>
+    </ul>
+  </nav>
+
+  <div th:if="${username != null}" class="profile">
+    <form th:action="@{/admin/logout}" method="post">
+      <p style="color: blue;" th:text="${username}"></p>
+      <p style="color: red;" th:text="${role}"></p>
+      <button type="submit">Logout</button>
+    </form>
+  </div>
+
+  <div th:unless="${username != null}">
+    <a th:href="@{/admin/login}">Login</a>
+  </div>
+</div>
+
+</body>
+</html>

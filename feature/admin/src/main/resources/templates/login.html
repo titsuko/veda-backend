@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Login</title>
+</head>
+<body>
+
+<div th:replace="~{layouts/topbar :: header}"></div>
+
+<form th:action="@{/admin/login}" method="post">
+  <div th:if="${error}" style="color: red;" th:text="${error}"></div>
+
+  <label>
+    <p>Email:</p>
+    <input type="email" name="email" required>
+  </label>
+  <label>
+    <p>Password:</p>
+    <input type="password" name="password" required>
+  </label>
+  <input type="submit" value="Login">
+</form>
+
+</body>
+</html>

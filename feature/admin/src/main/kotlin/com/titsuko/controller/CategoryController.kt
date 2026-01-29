@@ -1,13 +1,13 @@
-package com.titsuko
+package com.titsuko.controller
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping("/admin")
-class HomeController {
+@RequestMapping("/admin/category")
+class CategoryController {
 
     @GetMapping
-    fun getPage(): String = "home"
+    fun showPage(): String = "category"
 }
