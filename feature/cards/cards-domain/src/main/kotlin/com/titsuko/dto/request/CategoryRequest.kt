@@ -2,7 +2,7 @@ package com.titsuko.dto.request
 
 import jakarta.validation.constraints.NotBlank
 
-data class CardCategoryRequest(
+data class CategoryRequest(
     @field:NotBlank(message = "Title is required")
     val title: String? = null,
 

@@ -41,5 +41,5 @@ class Card(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    var category: CardCategory? = null
+    var category: Category? = null
 )

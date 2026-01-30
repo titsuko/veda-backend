@@ -7,5 +7,5 @@ data class CardResponse(
     val description: String?,
     val status: String,
     val rarity: String,
-    val category: CardCategoryResponse?
+    val category: CategoryResponse?
 )
