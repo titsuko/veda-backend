@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="pageHeader(title, createBtnId, createBtnText)"
+     style="display: flex; justify-content: space-between; align-items: center;">
+  <h1 class="container__title" th:text="${title}">Page Title</h1>
+  <button th:if="${createBtnId != null}"
+          type="button"
+          class="button button--primary"
+          th:id="${createBtnId}"
+          th:text="${createBtnText}">
+    Action
+  </button>
+</div>
+
+<div th:fragment="pagination(page, url)" class="pagination" th:if="${page.totalPages > 0}">
+  <a th:if="${page.number > 0}"
+     class="button button--primary"
+     th:href="@{${url}(page=${page.number - 1})}">Previous</a>
+
+  <span th:text="'Page ' + (${page.number + 1}) + ' of ' + ${page.totalPages}"></span>
+
+  <a th:if="${page.number < page.totalPages - 1}"
+     class="button button--primary"
+     th:href="@{${url}(page=${page.number + 1})}">Next</a>
+</div>
+
+<div th:fragment="modal(id, title, content)">
+  <div th:id="${id}" class="modal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title" th:text="${title}">Modal Title</h2>
+        <button type="button" class="modal__close" data-modal-close>&times;</button>
+      </div>
+      <th:block th:replace="${content}" />
+    </div>
+  </div>
+</div>
+
+<div th:fragment="deleteModal(id, formId, text)">
+  <div th:id="${id}" class="modal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h2 class="modal__title">Confirm Delete</h2>
+        <button type="button" class="modal__close" data-modal-close>&times;</button>
+      </div>
+      <p style="margin-bottom: 24px; color: var(--text-secondary);" th:text="${text}">
+        Are you sure?
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" class="button" data-modal-close>Cancel</button>
+        <form th:id="${formId}" method="post" style="margin:0;">
+          <button type="submit" class="button button--danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

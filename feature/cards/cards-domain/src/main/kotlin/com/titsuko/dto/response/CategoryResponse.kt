@@ -1,6 +1,6 @@
 package com.titsuko.dto.response
 
-data class CardCategoryResponse(
+data class CategoryResponse(
     val id: Long,
     val slug: String,
     val title: String,

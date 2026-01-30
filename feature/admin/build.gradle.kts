@@ -15,4 +15,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":feature:identity:identity-api"))
     implementation(project(":feature:identity:identity-domain"))
+
+    implementation(project(":feature:cards:cards-api"))
+    implementation(project(":feature:cards:cards-domain"))
 }

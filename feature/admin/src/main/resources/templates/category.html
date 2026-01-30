@@ -1,18 +1,94 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Category</title>
-</head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(title='Manage Categories', content=~{::section}, script=~{::script})}">
 <body>
 
-<div th:replace="~{layouts/topbar :: header}"></div>
+<section>
+    <div th:replace="~{layouts/fragments :: pageHeader(title='Manage Categories', createBtnId='openCreateModalBtn', createBtnText='Add Category')}"></div>
 
-<main>
-    <h1>Welcome to <b>Category</b> page</h1>
-</main>
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+            <tr>
+                <th class="table__head-cell">ID</th>
+                <th class="table__head-cell">Title</th>
+                <th class="table__head-cell">Slug</th>
+                <th class="table__head-cell">Description</th>
+                <th class="table__head-cell">Cards</th>
+                <th class="table__head-cell">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="cat : ${categories}" class="table__row">
+                <td class="table__cell" th:text="${cat.id}"></td>
+                <td class="table__cell" th:text="${cat.title}"></td>
+                <td class="table__cell" th:text="${cat.slug}"></td>
+                <td class="table__cell" th:text="${cat.description}"></td>
+                <td class="table__cell">
+                     <span th:text="${cat.cardsCount}"
+                           style="padding: 2px 8px; border-radius: 99px; background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 600;">
+                     </span>
+                </td>
+                <td class="table__cell">
+                    <div class="table__actions">
+                        <button type="button" class="button button--edit"
+                                data-action="edit"
+                                th:data-id="${cat.id}"
+                                th:data-title="${cat.title}"
+                                th:data-slug="${cat.slug}"
+                                th:data-description="${cat.description}">
+                            Edit
+                        </button>
+                        <button type="button" class="button button--danger" data-action="delete" th:data-id="${cat.id}">
+                            Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{layouts/fragments :: modal(id='createCategoryModal', title='New Category', content=~{::#createCategoryForm})}">
+        <form id="createCategoryForm" th:action="@{/admin/category/create}" method="post" class="form">
+            <div class="form__group">
+                <label class="form__label">Title</label>
+                <input type="text" class="form__input" name="title" required>
+            </div>
+            <div class="form__group">
+                <label class="form__label">Slug (Optional)</label>
+                <input type="text" class="form__input" name="slug" placeholder="Auto-generated if empty">
+            </div>
+            <div class="form__group">
+                <label class="form__label">Description</label>
+                <textarea class="form__input" name="description" rows="3"></textarea>
+            </div>
+            <button type="submit" class="button button--success">Create</button>
+        </form>
+    </div>
+
+    <div th:replace="~{layouts/fragments :: modal(id='editCategoryModal', title='Edit Category', content=~{::#editCategoryForm})}">
+        <form id="editCategoryForm" method="post" class="form">
+            <div class="form__group">
+                <label class="form__label">Title</label>
+                <input type="text" class="form__input" name="title" required>
+            </div>
+            <div class="form__group">
+                <label class="form__label">Slug</label>
+                <input type="text" class="form__input" name="slug">
+            </div>
+            <div class="form__group">
+                <label class="form__label">Description</label>
+                <textarea class="form__input" name="description" rows="3"></textarea>
+            </div>
+            <button type="submit" class="button button--success">Save Changes</button>
+        </form>
+    </div>
+
+    <div th:replace="~{layouts/fragments :: deleteModal(id='deleteConfirmModal', formId='deleteCategoryForm', text='Are you sure you want to delete this category?')}"></div>
+</section>
+
+<script th:src="@{/js/category.js}"></script>
 
 </body>
 </html>

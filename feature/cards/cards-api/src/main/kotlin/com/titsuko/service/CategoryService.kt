@@ -1,22 +1,22 @@
 package com.titsuko.service
 
-import com.titsuko.dto.request.CardCategoryRequest
-import com.titsuko.dto.response.CardCategoryResponse
+import com.titsuko.dto.request.CategoryRequest
+import com.titsuko.dto.response.CategoryResponse
 import com.titsuko.exception.CategoryNotFoundException
-import com.titsuko.model.CardCategory
-import com.titsuko.repository.CardCategoryRepository
+import com.titsuko.model.Category
+import com.titsuko.repository.CategoryRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class CardCategoryService(
-    private val cardCategoryRepository: CardCategoryRepository
+class CategoryService(
+    private val categoryRepository: CategoryRepository
 ) {
 
     @Transactional
-    fun createCategory(request: CardCategoryRequest): CardCategoryResponse {
+    fun createCategory(request: CategoryRequest): CategoryResponse {
         val titleToUse = requireNotNull(request.title) { "Category title must not be null" }
         val slug = if (!request.slug.isNullOrBlank()) {
             formatSlug(request.slug!!)
@@ -24,8 +24,8 @@ class CardCategoryService(
             generateSlug(titleToUse)
         }
 
-        val savedCategory = cardCategoryRepository.save(
-            CardCategory(
+        val savedCategory = categoryRepository.save(
+            Category(
                 title = titleToUse,
                 slug = slug,
                 description = request.description
@@ -36,20 +36,20 @@ class CardCategoryService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllCategories(): List<CardCategoryResponse> {
-        return cardCategoryRepository.findAll().map { mapToResponse(it) }
+    fun getAllCategories(): List<CategoryResponse> {
+        return categoryRepository.findAll().map { mapToResponse(it) }
     }
 
     @Transactional(readOnly = true)
-    fun getCategoryById(id: Long): CardCategoryResponse {
-        val category = cardCategoryRepository.findByIdOrNull(id)
+    fun getCategoryById(id: Long): CategoryResponse {
+        val category = categoryRepository.findByIdOrNull(id)
             ?: throw CategoryNotFoundException()
         return mapToResponse(category)
     }
 
     @Transactional
-    fun updateCategory(id: Long, request: CardCategoryRequest): CardCategoryResponse {
-        val category = cardCategoryRepository.findByIdOrNull(id)
+    fun updateCategory(id: Long, request: CategoryRequest): CategoryResponse {
+        val category = categoryRepository.findByIdOrNull(id)
             ?: throw CategoryNotFoundException()
 
         category.apply {
@@ -62,20 +62,20 @@ class CardCategoryService(
             description = request.description
         }
 
-        return mapToResponse(cardCategoryRepository.save(category))
+        return mapToResponse(categoryRepository.save(category))
     }
 
     @Transactional
     fun deleteCategory(id: Long) {
-        if (!cardCategoryRepository.existsById(id)) {
+        if (!categoryRepository.existsById(id)) {
             throw CategoryNotFoundException()
         }
-        cardCategoryRepository.deleteById(id)
+        categoryRepository.deleteById(id)
     }
 
     private fun generateSlug(input: String): String {
         val baseSlug = formatSlug(input)
-        return if (cardCategoryRepository.existsBySlug(baseSlug)) {
+        return if (categoryRepository.existsBySlug(baseSlug)) {
             "$baseSlug-${UUID.randomUUID().toString().take(5)}"
         } else {
             baseSlug
@@ -89,8 +89,8 @@ class CardCategoryService(
             .trim('-')
     }
 
-    private fun mapToResponse(category: CardCategory): CardCategoryResponse {
-        return CardCategoryResponse(
+    private fun mapToResponse(category: Category): CategoryResponse {
+        return CategoryResponse(
             id = category.id,
             slug = category.slug,
             title = category.title,

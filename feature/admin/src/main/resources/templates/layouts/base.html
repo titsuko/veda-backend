@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content, script)">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title th:text="${title}">Titsuko Admin</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{layouts/topbar :: header}"></div>
+
+<main class="container">
+  <div th:if="${param.error}" class="alert alert--error">
+    <span th:text="${param.error}"></span>
+  </div>
+
+  <th:block th:replace="${content}" />
+</main>
+
+<th:block th:replace="${script}" />
+
+</body>
+</html>

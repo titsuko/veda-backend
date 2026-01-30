@@ -1,4 +1,4 @@
-package com.titsuko.interceptor
+package com.titsuko.config
 
 import com.titsuko.model.`object`.Role
 import com.titsuko.security.JwtService
@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.ModelAndView
 
 @Component
 class AuthInterceptor(
@@ -31,27 +32,49 @@ class AuthInterceptor(
         }
 
         val email = jwtService.extractEmail(token)
-            ?: response.sendRedirect("/admin/login")
+            ?: run {
+                response.sendRedirect("/admin/login")
+                return false
+            }
 
         val auth = UsernamePasswordAuthenticationToken(email, null, emptyList())
         SecurityContextHolder.getContext().authentication = auth
 
         try {
             val profile = accountService.getProfile()
-            println(profile.role)
 
             if (profile.role != Role.ADMIN.toString()) {
                 response.sendRedirect("/admin/login")
                 return false
             }
 
+            request.setAttribute("currentUsername", "${profile.firstName} ${profile.lastName}")
+            request.setAttribute("currentRole", profile.role)
+
             return true
-        }
-        catch (_: Exception) {
+        } catch (_: Exception) {
             response.sendRedirect("/admin/login")
             return false
         }
+    }
 
+    override fun postHandle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+        modelAndView: ModelAndView?
+    ) {
+        if (modelAndView != null) {
+            val username = request.getAttribute("currentUsername")
+            val role = request.getAttribute("currentRole")
+
+            if (username != null) {
+                modelAndView.addObject("username", username)
+            }
+            if (role != null) {
+                modelAndView.addObject("role", role)
+            }
+        }
     }
 
     override fun afterCompletion(

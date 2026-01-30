@@ -1,15 +1,17 @@
 package com.titsuko.service
 
 import com.titsuko.dto.request.CardRequest
-import com.titsuko.dto.response.CardCategoryResponse
+import com.titsuko.dto.response.CategoryResponse
 import com.titsuko.dto.response.CardResponse
 import com.titsuko.exception.CardNotFoundException
 import com.titsuko.model.Card
 import com.titsuko.model.`object`.CardRarity
 import com.titsuko.model.`object`.CardStatus
-import com.titsuko.repository.CardCategoryRepository
+import com.titsuko.repository.CategoryRepository
 import com.titsuko.repository.CardRepository
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +20,7 @@ import java.util.UUID
 @Service
 class CardService(
     private val cardRepository: CardRepository,
-    private val cardCategoryRepository: CardCategoryRepository
+    private val categoryRepository: CategoryRepository
 ) {
 
     @Transactional
@@ -31,7 +33,7 @@ class CardService(
         }
 
         val category = request.categoryId?.let {
-            cardCategoryRepository.findByIdOrNull(it)
+            categoryRepository.findByIdOrNull(it)
         }
 
         val savedCard = cardRepository.save(
@@ -60,6 +62,11 @@ class CardService(
     }
 
     @Transactional(readOnly = true)
+    fun getAllCardsPageable(pageable: Pageable): Page<CardResponse> {
+        return cardRepository.findAll(pageable).map { mapToResponse(it) }
+    }
+
+    @Transactional(readOnly = true)
     fun getCardById(id: Long): CardResponse {
         val card = cardRepository.findByIdOrNull(id)
             ?: throw CardNotFoundException()
@@ -84,7 +91,7 @@ class CardService(
             ?: throw CardNotFoundException()
 
         val category = request.categoryId?.let {
-            cardCategoryRepository.findByIdOrNull(it)
+            categoryRepository.findByIdOrNull(it)
         }
 
         card.apply {
@@ -137,7 +144,7 @@ class CardService(
             status = card.status.toString(),
             rarity = card.rarity.toString(),
             category = card.category?.let {
-                CardCategoryResponse(
+                CategoryResponse(
                     id = it.id,
                     slug = it.slug,
                     title = it.title,

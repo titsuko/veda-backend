@@ -3,25 +3,38 @@
 <body>
 
 <div th:fragment="header" class="topbar">
-  <h3>Admin panel</h3>
+  <h3 class="topbar__brand">Admin Panel</h3>
 
-  <nav th:if="${username != null}" class="navigation">
-    <ul>
-      <li><a th:href="@{/admin}">Dashboard</a></li>
-      <li><a th:href="@{/admin/users}">Users</a></li>
+  <nav th:if="${username != null}" class="topbar__nav">
+    <ul class="topbar__menu">
+      <li class="topbar__menu-item">
+        <a th:href="@{/admin}" class="topbar__link">Dashboard</a>
+      </li>
+      <li class="topbar__menu-item">
+        <a th:href="@{/admin/users}" class="topbar__link">Users</a>
+      </li>
+      <li class="topbar__menu-item">
+        <a th:href="@{/admin/category}" class="topbar__link">Category</a>
+      </li>
+      <li class="topbar__menu-item">
+        <a th:href="@{/admin/cards}" class="topbar__link">Cards</a>
+      </li>
     </ul>
   </nav>
 
-  <div th:if="${username != null}" class="profile">
-    <form th:action="@{/admin/logout}" method="post">
-      <p style="color: blue;" th:text="${username}"></p>
-      <p style="color: red;" th:text="${role}"></p>
-      <button type="submit">Logout</button>
+  <div th:if="${username != null}" class="topbar__profile">
+    <div class="topbar__user-info">
+      <span class="topbar__username" th:text="${username}">User</span>
+      <span class="topbar__role" th:text="${role}">ROLE</span>
+    </div>
+
+    <form th:action="@{/admin/logout}" method="post" class="topbar__logout-form">
+      <button type="submit" class="topbar__logout-btn">Logout</button>
     </form>
   </div>
 
-  <div th:unless="${username != null}">
-    <a th:href="@{/admin/login}">Login</a>
+  <div th:unless="${username != null}" class="topbar__auth">
+    <a th:href="@{/admin/login}" class="button button--primary">Login</a>
   </div>
 </div>
 

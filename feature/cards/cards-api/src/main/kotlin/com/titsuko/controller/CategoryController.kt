@@ -1,8 +1,8 @@
 package com.titsuko.controller
 
-import com.titsuko.dto.request.CardCategoryRequest
-import com.titsuko.dto.response.CardCategoryResponse
-import com.titsuko.service.CardCategoryService
+import com.titsuko.dto.request.CategoryRequest
+import com.titsuko.dto.response.CategoryResponse
+import com.titsuko.service.CategoryService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -18,27 +18,27 @@ import org.springframework.web.bind.annotation.ResponseStatus
 @RestController
 @RequestMapping("/api/categories")
 class CategoryController(
-    private val categoryService: CardCategoryService
+    private val categoryService: CategoryService
 ) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createCategory(@Valid @RequestBody request: CardCategoryRequest): CardCategoryResponse {
+    fun createCategory(@Valid @RequestBody request: CategoryRequest): CategoryResponse {
         return categoryService.createCategory(request)
     }
 
     @GetMapping
-    fun getAllCategories(): List<CardCategoryResponse> {
+    fun getAllCategories(): List<CategoryResponse> {
         return categoryService.getAllCategories()
     }
 
     @GetMapping("/{id}")
-    fun getCategoryById(@PathVariable id: Long): CardCategoryResponse {
+    fun getCategoryById(@PathVariable id: Long): CategoryResponse {
         return categoryService.getCategoryById(id)
     }
 
     @PutMapping("/{id}")
-    fun updateCategory(@PathVariable id: Long, @Valid @RequestBody request: CardCategoryRequest): CardCategoryResponse {
+    fun updateCategory(@PathVariable id: Long, @Valid @RequestBody request: CategoryRequest): CategoryResponse {
         return categoryService.updateCategory(id, request)
     }
 
