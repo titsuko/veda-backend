@@ -16,7 +16,8 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class AdminFilter(
     private val objectMapper: ObjectMapper,
-    @Qualifier("requestMappingHandlerMapping")
+
+    @param:Qualifier("requestMappingHandlerMapping")
     private val handlerMapping: HandlerMapping
 ) : OncePerRequestFilter() {
 

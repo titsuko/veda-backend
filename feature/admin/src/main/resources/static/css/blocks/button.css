@@ -1,0 +1,55 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button--primary {
+    background-color: var(--surface-color);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.button--primary:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.button--edit {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.button--edit:hover {
+    background-color: var(--primary-hover);
+}
+
+.button--danger {
+    background-color: white;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+.button--danger:hover {
+    background-color: #fef2f2;
+}
+
+.button--success {
+    background-color: var(--primary-color);
+    color: white;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.button--success:hover {
+    background-color: var(--primary-hover);
+}
