@@ -5,6 +5,9 @@ import com.titsuko.dto.response.CategoryResponse
 import com.titsuko.exception.CategoryNotFoundException
 import com.titsuko.model.Category
 import com.titsuko.repository.CategoryRepository
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,25 +17,11 @@ import java.util.UUID
 class CategoryService(
     private val categoryRepository: CategoryRepository
 ) {
+    private val logger = LoggerFactory.getLogger(CategoryService::class.java)
 
-    @Transactional
-    fun createCategory(request: CategoryRequest): CategoryResponse {
-        val titleToUse = requireNotNull(request.title) { "Category title must not be null" }
-        val slug = if (!request.slug.isNullOrBlank()) {
-            formatSlug(request.slug!!)
-        } else {
-            generateSlug(titleToUse)
-        }
-
-        val savedCategory = categoryRepository.save(
-            Category(
-                title = titleToUse,
-                slug = slug,
-                description = request.description
-            )
-        )
-
-        return mapToResponse(savedCategory)
+    @Transactional(readOnly = true)
+    fun getAllCategoriesPageable(pageable: Pageable): Page<CategoryResponse> {
+        return categoryRepository.findAll(pageable).map { mapToResponse(it) }
     }
 
     @Transactional(readOnly = true)
@@ -48,20 +37,30 @@ class CategoryService(
     }
 
     @Transactional
+    fun createCategory(request: CategoryRequest): CategoryResponse {
+        val title = requireNotNull(request.title) { "Category title must not be null" }
+        val slug = request.slug?.takeIf { it.isNotBlank() }?.let { formatSlug(it) } ?: generateSlug(title)
+
+        val category = categoryRepository.save(
+            Category(title = title, slug = slug, description = request.description)
+        )
+        logger.info("Created category: ${category.title} (ID: ${category.id})")
+        return mapToResponse(category)
+    }
+
+    @Transactional
     fun updateCategory(id: Long, request: CategoryRequest): CategoryResponse {
         val category = categoryRepository.findByIdOrNull(id)
             ?: throw CategoryNotFoundException()
 
-        category.apply {
-            title = request.title ?: this.title
-            slug = if (!request.slug.isNullOrBlank()) {
-                formatSlug(request.slug!!)
-            } else {
-                generateSlug(title)
-            }
-            description = request.description
+        category.title = request.title ?: category.title
+        category.description = request.description ?: category.description
+
+        if (!request.slug.isNullOrBlank()) {
+            category.slug = formatSlug(request.slug!!)
         }
 
+        logger.info("Updated category: ${category.title} (ID: ${category.id})")
         return mapToResponse(categoryRepository.save(category))
     }
 
@@ -71,6 +70,7 @@ class CategoryService(
             throw CategoryNotFoundException()
         }
         categoryRepository.deleteById(id)
+        logger.info("Deleted category ID: $id")
     }
 
     private fun generateSlug(input: String): String {

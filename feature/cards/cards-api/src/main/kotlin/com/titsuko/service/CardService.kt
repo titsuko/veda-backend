@@ -1,14 +1,15 @@
 package com.titsuko.service
 
 import com.titsuko.dto.request.CardRequest
-import com.titsuko.dto.response.CategoryResponse
 import com.titsuko.dto.response.CardResponse
+import com.titsuko.dto.response.CategoryResponse
 import com.titsuko.exception.CardNotFoundException
 import com.titsuko.model.Card
 import com.titsuko.model.`object`.CardRarity
 import com.titsuko.model.`object`.CardStatus
-import com.titsuko.repository.CategoryRepository
 import com.titsuko.repository.CardRepository
+import com.titsuko.repository.CategoryRepository
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -22,23 +23,18 @@ class CardService(
     private val cardRepository: CardRepository,
     private val categoryRepository: CategoryRepository
 ) {
+    private val logger = LoggerFactory.getLogger(CardService::class.java)
 
     @Transactional
     fun createCard(request: CardRequest): CardResponse {
-        val titleToUse = requireNotNull(request.title) { "Card title must not be null" }
-        val slug = if (!request.slug.isNullOrBlank()) {
-            formatSlug(request.slug!!)
-        } else {
-            generateSlug(titleToUse)
-        }
+        val title = requireNotNull(request.title) { "Card title must not be null" }
+        val slug = request.slug?.takeIf { it.isNotBlank() }?.let { formatSlug(it) } ?: generateSlug(title)
 
-        val category = request.categoryId?.let {
-            categoryRepository.findByIdOrNull(it)
-        }
+        val category = request.categoryId?.let { categoryRepository.findByIdOrNull(it) }
 
-        val savedCard = cardRepository.save(
+        val card = cardRepository.save(
             Card(
-                title = titleToUse,
+                title = title,
                 slug = slug,
                 description = request.description,
                 content = request.content ?: emptyList(),
@@ -47,8 +43,8 @@ class CardService(
                 category = category
             )
         )
-
-        return mapToResponse(savedCard)
+        logger.info("Created card: ${card.title} (ID: ${card.id})")
+        return mapToResponse(card)
     }
 
     @Transactional(readOnly = true)
@@ -69,15 +65,13 @@ class CardService(
 
     @Transactional(readOnly = true)
     fun getCardById(id: Long): CardResponse {
-        val card = cardRepository.findByIdOrNull(id)
-            ?: throw CardNotFoundException()
+        val card = cardRepository.findByIdOrNull(id) ?: throw CardNotFoundException()
         return mapToResponse(card)
     }
 
     @Transactional(readOnly = true)
     fun getCardBySlug(slug: String): CardResponse {
-        val card = cardRepository.findBySlug(slug)
-            ?: throw CardNotFoundException()
+        val card = cardRepository.findBySlug(slug) ?: throw CardNotFoundException()
         return mapToResponse(card)
     }
 
@@ -88,28 +82,27 @@ class CardService(
 
     @Transactional
     fun updateCard(id: Long, request: CardRequest): CardResponse {
-        val card = cardRepository.findByIdOrNull(id)
-            ?: throw CardNotFoundException()
+        val card = cardRepository.findByIdOrNull(id) ?: throw CardNotFoundException()
 
-        val category = request.categoryId?.let {
-            categoryRepository.findByIdOrNull(it)
-        }
-
-        card.apply {
-            val newTitle = request.title ?: this.title
-            title = newTitle
-            slug = if (!request.slug.isNullOrBlank()) {
-                formatSlug(request.slug!!)
-            } else {
-                generateSlug(newTitle)
+        request.title?.let {
+            card.title = it
+            if (request.slug.isNullOrBlank()) {
+                card.slug = generateSlug(it)
             }
-            description = request.description
-            content = request.content ?: this.content
-            status = request.status ?: CardStatus.Hidden
-            rarity = request.rarity ?: CardRarity.COMMON
-            this.category = category
         }
 
+        request.slug?.takeIf { it.isNotBlank() }?.let { card.slug = formatSlug(it) }
+
+        card.description = request.description ?: card.description
+        card.content = request.content ?: card.content
+        card.status = request.status ?: card.status
+        card.rarity = request.rarity ?: card.rarity
+
+        request.categoryId?.let {
+            card.category = categoryRepository.findByIdOrNull(it)
+        }
+
+        logger.info("Updated card: ${card.title} (ID: ${card.id})")
         return mapToResponse(cardRepository.save(card))
     }
 
@@ -119,6 +112,7 @@ class CardService(
             throw CardNotFoundException()
         }
         cardRepository.deleteById(id)
+        logger.info("Deleted card ID: $id")
     }
 
     private fun generateSlug(input: String): String {

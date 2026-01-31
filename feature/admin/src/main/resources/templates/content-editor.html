@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(title='Edit: ' + ${card.title}, content=~{::content}, script=~{::scripts})}">
+
+<div th:fragment="content">
+    <section class="editor container">
+        <header class="editor__header">
+            <div class="editor__info">
+                <a th:href="@{/admin/cards}" class="button button--secondary editor__back-btn">&larr; Back</a>
+                <div class="editor__meta">
+                    <h1 class="editor__title" th:text="${card.title}">Card Title</h1>
+                </div>
+            </div>
+            <div class="editor__controls">
+                <span id="saveStatus" class="editor__status-text"></span>
+                <button id="saveBtn" type="button" class="button button--primary">Save Changes</button>
+            </div>
+        </header>
+
+        <div class="editor__canvas" id="editorContainer">
+            <div id="editorjs" class="editor__content"></div>
+        </div>
+    </section>
+</div>
+
+<th:block th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.28.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script>
+
+    <script th:inline="javascript">
+        const CARD_ID = [[${card.id}]];
+        const SERVER_DATA = [(${contentJson})];
+    </script>
+
+    <script th:src="@{/js/editor.js}"></script>
+</th:block>
+</html>

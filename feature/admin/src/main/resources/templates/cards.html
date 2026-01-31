@@ -15,8 +15,7 @@
                 <th class="table__head-cell">Status</th>
                 <th class="table__head-cell">Rarity</th>
                 <th class="table__head-cell">Category</th>
-                <th class="table__head-cell">Actions</th>
-            </tr>
+                <th class="table__head-cell" style="width: 280px;">Actions</th> </tr>
             </thead>
             <tbody>
             <tr th:each="card : ${cardsPage.content}" class="table__row">
@@ -38,6 +37,13 @@
                 <td class="table__cell" th:text="${card.category != null ? card.category.title : '-'}"></td>
                 <td class="table__cell">
                     <div class="table__actions">
+
+                        <a th:href="@{/admin/cards/content/{id}(id=${card.id})}"
+                           class="button button--primary"
+                           style="text-decoration: none; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
+                            Content
+                        </a>
+
                         <button type="button" class="button button--edit"
                                 data-action="edit"
                                 th:data-id="${card.id}"
@@ -49,6 +55,7 @@
                                 th:data-category-id="${card.category != null ? card.category.id : ''}">
                             Edit
                         </button>
+
                         <button type="button" class="button button--danger" data-action="delete" th:data-id="${card.id}">
                             Delete
                         </button>

@@ -9,6 +9,7 @@ import com.titsuko.repository.UserRepository
 import com.titsuko.security.HashEncoder
 import com.titsuko.security.JwtService
 import com.titsuko.security.RefreshService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,17 +21,23 @@ class SessionService(
     private val refreshService: RefreshService
 ) {
 
+    private val logger = LoggerFactory.getLogger(SessionService::class.java)
+
     @Transactional
     fun login(request: LoginRequest): AuthResponse {
-        val user = userRepository.findByEmail(requireNotNull(request.email))
-            ?: throw UserNotFoundException(requireNotNull(request.email))
+        val email = requireNotNull(request.email)
+        val user = userRepository.findByEmail(email)
+            ?: throw UserNotFoundException(email)
 
         if (!hashEncoder.matches(requireNotNull(request.password), user.password)) {
+            logger.warn("Failed login attempt for user: $email")
             throw InvalidCredentialsException()
         }
 
         val accessToken = jwtService.generateAccessToken(user.email)
         val refreshToken = refreshService.createToken(user)
+
+        logger.info("User logged in: $email")
 
         return AuthResponse(
             accessToken.first,

@@ -8,12 +8,15 @@ import com.titsuko.model.content.TextBlock
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type"
+    include = JsonTypeInfo.As.PROPERTY, // Важно: поле type будет частью JSON
+    property = "type",
+    visible = true // ВАЖНО: позволяет нам иметь поле val type в классах
 )
 @JsonSubTypes(
     JsonSubTypes.Type(value = HeaderBlock::class, name = "header"),
     JsonSubTypes.Type(value = TextBlock::class, name = "text"),
     JsonSubTypes.Type(value = ImageBlock::class, name = "image"),
 )
-interface ContentBlock
+interface ContentBlock {
+    val type: String // Обязываем классы иметь это поле
+}

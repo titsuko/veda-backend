@@ -15,6 +15,7 @@ import com.titsuko.repository.UserRepository
 import com.titsuko.security.HashEncoder
 import com.titsuko.security.JwtService
 import com.titsuko.security.RefreshService
+import org.slf4j.LoggerFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,9 +29,12 @@ class AccountService(
     private val hashEncoder: HashEncoder
 ) {
 
+    private val logger = LoggerFactory.getLogger(AccountService::class.java)
+
     @Transactional
     fun register(request: RegisterRequest): AuthResponse {
-        if (userRepository.findByEmail(requireNotNull(request.email)) != null) {
+        val email = requireNotNull(request.email)
+        if (userRepository.findByEmail(email) != null) {
             throw UserAlreadyExistsException()
         }
 
@@ -38,22 +42,17 @@ class AccountService(
         val (firstName, lastName) = parseFullName(requireNotNull(request.fullName))
 
         val profile = profileRepository.save(
-            Profile(
-                firstName = firstName,
-                lastName = lastName
-            )
+            Profile(firstName = firstName, lastName = lastName)
         )
 
         val user = userRepository.save(
-            User(
-                email = requireNotNull(request.email),
-                password = hashedPassword,
-                profile = profile
-            )
+            User(email = email, password = hashedPassword, profile = profile)
         )
 
         val accessToken = jwtService.generateAccessToken(user.email)
         val refreshToken = refreshService.createToken(user)
+
+        logger.info("New user registered: $email")
 
         return AuthResponse(
             accessToken = accessToken.first,
@@ -62,15 +61,9 @@ class AccountService(
         )
     }
 
-    private fun parseFullName(fullName: String): Pair<String, String> {
-        val parts = fullName.trim().split("\\s+".toRegex(), 2)
-        return parts[0] to (parts.getOrNull(1) ?: "")
-    }
-
     @Transactional(readOnly = true)
     fun getProfile(): AccountResponse {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val email = authentication?.name
+        val email = SecurityContextHolder.getContext().authentication?.name
             ?: throw InvalidTokenException("Session expired or invalid")
 
         val user = userRepository.findByEmail(email)
@@ -91,5 +84,10 @@ class AccountService(
             available = !exists,
             message = if (exists) "Email already exists" else "Email is available"
         )
+    }
+
+    private fun parseFullName(fullName: String): Pair<String, String> {
+        val parts = fullName.trim().split("\\s+".toRegex(), 2)
+        return parts[0] to (parts.getOrNull(1) ?: "")
     }
 }

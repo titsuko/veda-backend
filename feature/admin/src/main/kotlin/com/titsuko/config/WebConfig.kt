@@ -11,12 +11,7 @@ class WebConfig(
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(authInterceptor)
-            .addPathPatterns("/admin", "/admin/**")
-            .excludePathPatterns(
-                "/admin/login",
-                "/assets/**",
-                "/css/**",
-                "/js/**"
-            )
+            .addPathPatterns("/admin/**")
+            .excludePathPatterns("/css/**", "/js/**", "/assets/**")
     }
 }

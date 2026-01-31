@@ -26,12 +26,10 @@ class AuthController(
         model: Model
     ): String {
         return try {
-            val model = sessionService.login(request)
-            response.addCookie(Cookie("access_token", model.accessToken).apply {
-                isHttpOnly = true
-                path = "/"
-                maxAge = model.expiresIn.toInt()
-            })
+            val authData = sessionService.login(request)
+
+            response.addCookie(createCookie("access_token", authData.accessToken, authData.expiresIn.toInt()))
+            response.addCookie(createCookie("refresh_token", authData.refreshToken, 24 * 60 * 60))
 
             "redirect:/admin"
         } catch (e: UserNotFoundException) {
@@ -45,13 +43,21 @@ class AuthController(
 
     @PostMapping("/logout")
     fun logout(response: HttpServletResponse): String {
-        response.addCookie(Cookie("access_token", null).apply {
-            path = "/"
-            maxAge = 0
-        })
+        response.addCookie(createCookie("access_token", "", 0))
+        response.addCookie(createCookie("refresh_token", "", 0))
+
         return "redirect:/admin/login"
     }
 
     @GetMapping("/login")
     fun loginPage(): String = "login"
+
+    private fun createCookie(name: String, value: String, maxAge: Int): Cookie {
+        return Cookie(name, value).apply {
+            isHttpOnly = true
+            path = "/"
+
+            this.maxAge = maxAge
+        }
+    }
 }

@@ -19,7 +19,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="cat : ${categories}" class="table__row">
+            <tr th:each="cat : ${categoriesPage.content}" class="table__row">
                 <td class="table__cell" th:text="${cat.id}"></td>
                 <td class="table__cell" th:text="${cat.title}"></td>
                 <td class="table__cell" th:text="${cat.slug}"></td>
@@ -48,6 +48,8 @@
             </tbody>
         </table>
     </div>
+
+    <div th:replace="~{layouts/fragments :: pagination(page=${categoriesPage}, url='/admin/category')}"></div>
 
     <div th:replace="~{layouts/fragments :: modal(id='createCategoryModal', title='New Category', content=~{::#createCategoryForm})}">
         <form id="createCategoryForm" th:action="@{/admin/category/create}" method="post" class="form">

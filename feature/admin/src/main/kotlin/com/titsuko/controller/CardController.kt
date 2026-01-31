@@ -19,7 +19,7 @@ class CardController(
     @GetMapping
     fun getPage(
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "10") limit: Int,
+        @RequestParam(defaultValue = "7") limit: Int,
         model: Model
     ): String {
         val pageable = PageRequest.of(page, limit, Sort.by("id").descending())
