@@ -19,10 +19,11 @@ class ContentController(
     @GetMapping("/{id}")
     fun openEditor(@PathVariable id: Long, model: Model): String {
         val card = cardService.getCardById(id)
-        model.addAttribute("card", card)
-
         val content = card.content ?: emptyList()
-        model.addAttribute("contentJson", objectMapper.writeValueAsString(content))
+        val jsonContent = objectMapper.writeValueAsString(content)
+
+        model.addAttribute("card", card)
+        model.addAttribute("contentJson", if (jsonContent == "null" || jsonContent.isEmpty()) "[]" else jsonContent)
 
         return "content-editor"
     }
@@ -32,16 +33,12 @@ class ContentController(
     fun saveContent(
         @PathVariable id: Long,
         @RequestBody blocks: List<ContentBlock>
-    ): Map<String, String>
-    {
-        println("test message")
-
-        try {
-            println("get information")
+    ): Map<String, Any> {
+        return try {
             contentService.updateContent(id, blocks)
-            return mapOf("status" to "success")
-        } catch (_: Exception) {
-            return mapOf("status" to "error")
+            mapOf("status" to "success")
+        } catch (e: Exception) {
+            mapOf("status" to "error", "message" to (e.message ?: "Unknown server error"))
         }
     }
 }

@@ -3,7 +3,6 @@
       th:replace="~{layouts/base :: layout(title='Edit: ' + ${card.title}, content=~{::content}, script=~{::scripts})}">
 
 <div th:fragment="content">
-
     <section class="editor container">
         <header class="editor__header">
             <div class="editor__info">
@@ -32,10 +31,9 @@
 
     <script th:inline="javascript">
         const CARD_ID = [[${card.id}]];
-        const SERVER_DATA = [[${card.content}]] || [];
+        const SERVER_DATA = [(${contentJson})];
     </script>
 
     <script th:src="@{/js/editor.js}"></script>
 </th:block>
-
 </html>

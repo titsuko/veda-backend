@@ -37,8 +37,7 @@ class ContentEditor {
 
     _checkDependencies() {
         if (typeof EditorJS === 'undefined' || typeof SimpleImage === 'undefined') {
-            console.error('[ContentEditor] Libraries missing. Check HTML scripts.');
-            this._updateStatus('Libraries missing', 'error');
+            console.error('[ContentEditor] Libraries missing');
             return false;
         }
         return true;
@@ -76,7 +75,6 @@ class ContentEditor {
             image: {
                 class: SimpleImage,
                 inlineToolbar: true,
-
                 toolbox: {
                     title: 'Image',
                     icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 16 5-7 6 6.5m6.5 2.5L16 13l-4.286 6M14 10h.01M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/></svg>'
@@ -108,18 +106,20 @@ class ContentEditor {
             const outputData = await this.editor.save();
             const payload = outputData.blocks.map(BlockMapper.toBackend).filter(Boolean);
 
-            console.log("test");
-
             const response = await fetch(this.config.api.save, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 credentials: 'include',
                 body: JSON.stringify(payload)
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                if (response.status === 401) throw new Error('Unauthorized');
+                if (response.status === 403) throw new Error('Forbidden');
                 throw new Error(`Server error: ${response.status}`);
             }
 
@@ -152,28 +152,58 @@ class ContentEditor {
 
 class BlockMapper {
     static toEditor(block) {
-        if (!block) return null;
+        if (!block || !block.type) return null;
 
         switch (block.type) {
             case 'header':
-                return { type: 'header', data: { text: block.text || '', level: block.level || 2 } };
+                return {
+                    type: 'header',
+                    data: {
+                        text: block.text || '',
+                        level: block.level || 2
+                    }
+                };
             case 'text':
-                return { type: 'paragraph', data: { text: block.text || '' } };
+                return {
+                    type: 'paragraph',
+                    data: {
+                        text: block.text || ''
+                    }
+                };
             case 'image':
-                return { type: 'image', data: { url: block.url || '', caption: block.caption || '' } };
+                return {
+                    type: 'image',
+                    data: {
+                        url: block.url || '',
+                        caption: block.caption || ''
+                    }
+                };
             default:
                 return null;
         }
     }
 
     static toBackend(block) {
+        if (!block || !block.type || !block.data) return null;
+
         switch (block.type) {
             case 'header':
-                return { type: 'header', text: block.data.text || '', level: block.data.level };
+                return {
+                    type: 'header',
+                    text: block.data.text || '',
+                    level: block.data.level
+                };
             case 'paragraph':
-                return { type: 'text', text: block.data.text || '' };
+                return {
+                    type: 'text',
+                    text: block.data.text || ''
+                };
             case 'image':
-                return { type: 'image', url: block.data.url || '', caption: block.data.caption || '' };
+                return {
+                    type: 'image',
+                    url: block.data.url || '',
+                    caption: block.data.caption || ''
+                };
             default:
                 return null;
         }
